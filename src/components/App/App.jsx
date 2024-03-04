@@ -1,70 +1,85 @@
 import { useState, useEffect } from 'react';
+import SearchBar from '../SearchBar/SearchBar.jsx';
+import ImageGallery from '../ImageGallery/ImageGallery';
+import Loader from '../Loader/Loader.jsx';
+import ErrorMessage from '../ErrorMessage/ErrorMessage.jsx';
+import LoadMoreBtn from '../LoadMoreBtn/LoadMoreBtn.jsx';
+import ModalWindow from '../ModalWindow/ModalWindow.jsx';
 
-import ContactList from '../ContactList/ContactList.jsx';
-import SearchBox from '../SearchBox/SearchBox.jsx';
-import ContactForm from '../ContactForm/ContactForm.jsx';
+import { fetchImagesByQuery } from '../../API/imagesAPI.js';
 
-const searchBarTxt = "Find contacts by name";
-const KEY = "saved-contacts";
 
 export default function App() {
-  const [contacts, setContacts] = useState(() => {
-    const savedContacts = window.localStorage.getItem(KEY);
-    if (savedContacts !== null) {
-      return JSON.parse(savedContacts);
-    }
-    return [
-      {id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
-      {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
-      {id: 'id-3', name: 'Eden Clements', number: '645-17-79'},
-      {id: 'id-4', name: 'Annie Copeland', number: '227-91-26'},
-    ]
-  });
-
-  const [inputValue, setInputChanges] = useState("");
-
-  const handleChange = (event) => {
-    setInputChanges(event.target.value);
-  };
-
-  const contactsFilter = (value) => {
-    return (contacts.filter((contact) => contact.name.toLowerCase().includes(value.toLowerCase())));
-  }  
-
-  const filteredContacts = contactsFilter(inputValue);
-
-  function addNewContact(formData) {
-    setContacts([
-      ...contacts,
-      formData
-    ]);
-  }
+  const [query, setQuery] = useState("");  
+  const [page, setPage] = useState(1);  
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [modalIsOpen, setIsOpen] = useState(false);
+  const [largeImg, setLargeImg] = useState("");
 
   useEffect(() => {
-    window.localStorage.setItem(KEY, JSON.stringify(contacts));
-  }, [contacts]);
+    if (query === '') {
+      return;
+    }
 
-  function deleteContact(idToDelete) {
-    const contactsAfterDelete = contacts.filter((contact) => contact.id !== idToDelete);
-    setContacts(contactsAfterDelete);
+    async function getData() {
+      try {
+        setLoading(true);
+        const data = await fetchImagesByQuery(query, page);
+        setImages((prevImages) => {
+          return [...prevImages, ...data]
+        })
+      } catch (error) {
+        setLoading(false);
+        setError(true);
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    getData();
+  }, [page, query])
+    
+  function handleSearch(query) {
+    setPage(1);
+    setQuery(query);
+    setImages([]);
+  }
+
+  function handleLoadMore() {
+    setPage(page + 1);
+  }
+
+  function handleOpenModal(largeImg) {
+    setIsOpen(true);
+    setLargeImg(largeImg);
+  }
+
+  function handleModalClose() {
+    setIsOpen(false);
+    setLargeImg("");
   }
 
   return (
-    <div>
-      <h1>Phonebook</h1>
-      <ContactForm 
-        onSubmit={addNewContact}
-      />
-      <SearchBox 
-        searchBarTxt={searchBarTxt}
-        inputValue={inputValue}
-        handleChange={handleChange}
-      />
-      <ContactList 
-        contacts={inputValue == "" ? contacts : filteredContacts}
-        deleteContact={deleteContact}
-      />
-    </div>
+    <>
+      <SearchBar onSearch={handleSearch}/>
+      {images.length > 0 && 
+        <ImageGallery 
+          images={images}
+          handleOpenModal={handleOpenModal}
+        />}
+      {loading && <Loader />}
+      {images.length > 0 && <LoadMoreBtn handleLoadMore={handleLoadMore}/>}
+      {error && <ErrorMessage />}
+      {modalIsOpen && 
+        <ModalWindow 
+          isOpen={modalIsOpen}
+          largeImgSource={largeImg}
+          handleModalClose={handleModalClose}
+        />
+      }
+    </>
   )
 }
 

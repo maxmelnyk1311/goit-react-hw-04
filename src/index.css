@@ -2,7 +2,6 @@
 body {
   font-family: sans-serif;
   line-height: 1.5;
-  padding: 10px;
 }
 
 h1,
@@ -24,12 +23,11 @@ ol {
 
 img {
   display: block;
-  max-width: 100%;
+  width: 100%;
 }
 
 /* -------------STYLES FOR HOMEWORK ----------*/
 
 :root {
-  max-width: 1200px;
   margin: auto;
 }
