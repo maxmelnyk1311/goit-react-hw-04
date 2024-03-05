@@ -16,7 +16,8 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
-  const [largeImg, setLargeImg] = useState("");
+  const [imgItems, setImgItems] = useState({});
+  const [showBtn, setShowBtn] = useState(false);
 
   useEffect(() => {
     if (query === '') {
@@ -26,9 +27,10 @@ export default function App() {
     async function getData() {
       try {
         setLoading(true);
-        const data = await fetchImagesByQuery(query, page);
+        const {results, total_pages} = await fetchImagesByQuery(query, page);
+        setShowBtn(total_pages && total_pages !== page);
         setImages((prevImages) => {
-          return [...prevImages, ...data]
+          return [...prevImages, ...results]
         })
       } catch (error) {
         setLoading(false);
@@ -51,14 +53,14 @@ export default function App() {
     setPage(page + 1);
   }
 
-  function handleOpenModal(largeImg) {
+  function handleOpenModal(imgItems) {
     setIsOpen(true);
-    setLargeImg(largeImg);
+    setImgItems(imgItems);
   }
 
   function handleModalClose() {
     setIsOpen(false);
-    setLargeImg("");
+    setImgItems({});
   }
 
   return (
@@ -70,12 +72,12 @@ export default function App() {
           handleOpenModal={handleOpenModal}
         />}
       {loading && <Loader />}
-      {images.length > 0 && <LoadMoreBtn handleLoadMore={handleLoadMore}/>}
+      {showBtn && <LoadMoreBtn handleLoadMore={handleLoadMore}/>}
       {error && <ErrorMessage />}
       {modalIsOpen && 
         <ModalWindow 
           isOpen={modalIsOpen}
-          largeImgSource={largeImg}
+          imgItems={imgItems}
           handleModalClose={handleModalClose}
         />
       }

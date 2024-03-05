@@ -12,7 +12,7 @@ export default function ImageGallery({images, handleOpenModal}){
                     >
                         <ImageCard 
                             largeImg={image.urls.regular}
-                            handleOpenModal={() => handleOpenModal(image.urls.regular)}
+                            handleOpenModal={() => handleOpenModal(image)}
                             imgSource={image.urls.small}
                             imgAltText={image.alt_description}
                         />

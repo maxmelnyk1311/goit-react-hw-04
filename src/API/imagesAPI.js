@@ -13,5 +13,5 @@ export const fetchImagesByQuery = async (query, page) => {
             Authorization: "Authorization: Client-ID JklcAh0xNtCynPNEyRrGS09wboLhbYrq6ZORsDPNJOw"
         }
     });
-    return response.data.results;
+    return response.data;
 }

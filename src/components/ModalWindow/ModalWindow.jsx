@@ -1,7 +1,7 @@
 import ReactModal from 'react-modal';
 import css from './ModalWindow.module.css';
 
-export default function ModalWindow({isOpen, largeImgSource, handleModalClose}) {
+export default function ModalWindow({isOpen, imgItems, handleModalClose}) {
     return (
         <ReactModal
             isOpen={isOpen}
@@ -14,7 +14,8 @@ export default function ModalWindow({isOpen, largeImgSource, handleModalClose}) 
         >
             <img
                 className={css.modalWindow}
-                src={largeImgSource}
+                src={imgItems.urls.regular}
+                alt={imgItems.alt_description}
             />
         </ReactModal>
     )
